@@ -1,40 +1,28 @@
-
+//@farsmd
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiAP.h>
-
 #include <SPI.h>
 #include <MFRC522.h>
-
 #define LED_BUILTIN 2 
 #define D 25 
-
 #define RST_PIN 4
 #define SS_PIN 5
 byte readCard[4];
-
 String My_ID = "********";  
 String ID = "";
-
 const char *ssid = "Door";
 const char *password = "11223344";
-
 WiFiServer server(80);
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-
-
 void setup() {
   SPI.begin(); 
   mfrc522.PCD_Init();
-
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(D, OUTPUT);
-
   Serial.begin(115200);
-
   Serial.println();
   Serial.println("Configuring access point...");
-
   if (!WiFi.softAP(ssid, password)) {
     log_e("Soft AP creation failed.");
     while(1);
@@ -43,15 +31,12 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(myIP);
   server.begin();
-
   Serial.println("Server started");
 }
-
 void loop() {
   WiFiClient client = server.available();   
   while (getID()) {
   Serial.println(ID);
-
   }
   if (client) {                          
     Serial.println("New Client.");         
@@ -70,22 +55,17 @@ void loop() {
             client.print("<h1 style='font-size: 6VW;'> Last ID : ");
             client.print(ID);
             client.print("</h1>");
-
-            // The HTTP response ends with another blank line:
             client.println();
-            // break out of the while loop:
             break;
-          } else {    // if you got a newline, then clear currentLine:
+          } else { 
             currentLine = "";
           }
-        } else if (c != '\r') {  // if you got anything else but a carriage return character,
-          currentLine += c;      // add it to the end of the currentLine
+        } else if (c != '\r') {  
+          currentLine += c;    
         }
-
-        // Check to see if the client request was "GET /H" or "GET /L":
         if (currentLine.endsWith("GET /H")) {
           digitalWrite(LED_BUILTIN, HIGH);
-          digitalWrite(D, HIGH);                // GET /H turns the LED on
+          digitalWrite(D, HIGH);             
         }
         if (currentLine.endsWith("GET /L")) {
           digitalWrite(LED_BUILTIN, LOW);
@@ -93,14 +73,10 @@ void loop() {
         }
       }
     }
-    // close the connection:
     client.stop();
     Serial.println("Client Disconnected.");
   }
-
-	
 }
-
 boolean getID() 
 {
   if ( ! mfrc522.PICC_IsNewCardPresent()) { 
